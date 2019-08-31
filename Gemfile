@@ -13,8 +13,12 @@ gem 'puma', '~> 3.0'
 
 group :development, :test do
   gem 'pry'
+end
+
+group :test do
   gem 'rspec-rails'
   gem 'factory_bot_rails'
+  gem 'shoulda-matchers'
 end
 
 group :development do
