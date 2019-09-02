@@ -1,6 +1,8 @@
 class Transaction < ApplicationRecord
   ELIGIBLE_SPEND = 100
   FREE_TICKET_MOVIE_SPEND = 1_000
+  ELIGIBLE_QUARTERLY_SPEND = 2_000
+  QUARTERLY_BONUS_POINT = 100
 
   validates :amount_spent, presence: true
 
@@ -21,6 +23,18 @@ class Transaction < ApplicationRecord
   def self.sixty_days_after_first_spend
     first_transaction = order(:created_at).first
     where('created_at > ? and created_at < ?', first_transaction, first_transaction.created_at + 60.days)
+  end
+
+  def self.quarterly_spend
+    spend = []
+    monthly_spend.each_slice(3) do |months|
+      quarter_spend = 0
+      months.each do |month|
+        quarter_spend += month.monthly_spend
+      end
+      spend << quarter_spend
+    end
+    spend
   end
 
   def spent_oversea?

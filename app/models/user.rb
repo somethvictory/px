@@ -27,6 +27,12 @@ class User < ApplicationRecord
     end
 
     @total_point = ((oversea_spend / Transaction::ELIGIBLE_SPEND).to_i * STANDARD_POINT * 2 ) + (local_spend / Transaction::ELIGIBLE_SPEND).to_i * STANDARD_POINT
+
+    transactions.non_expired.quarterly_spend.each do |quarterly_spend|
+      @total_point +=  Transaction::QUARTERLY_BONUS_POINT if quarterly_spend > Transaction::ELIGIBLE_QUARTERLY_SPEND
+    end
+
+    @total_point
   end
 
   def birthday_month?

@@ -16,7 +16,7 @@ RSpec.describe User, 'Instance Method', type: :model do
   let!(:transaction2) { create(:transaction, user: user, country: user.country, amount_spent: 40, created_at: 1.years.ago) }
   let!(:transaction3) { create(:transaction, user: user, country: user.country, amount_spent: 70, created_at: 45.days.ago) }
   let!(:transaction4) { create(:transaction, user: user, country: user.country, amount_spent: 80, created_at: 30.days.ago) }
-  let!(:transaction5) { create(:transaction, user: user, country: user.country, amount_spent: 20, created_at: 10.days.ago)  }
+  let!(:transaction5) { create(:transaction, user: user, country: user.country, amount_spent: 20, created_at: 10.days.ago) }
 
   context 'without oversea transaction, #total_point' do
     it 'calculates all non expired transactions' do
@@ -26,11 +26,21 @@ RSpec.describe User, 'Instance Method', type: :model do
   end
 
   context 'with oversea transaction, #total_point' do
-    let!(:transaction6) { create(:transaction, user: user, amount_spent: 150, created_at: 10.days.ago)  }
+    let!(:transaction6) { create(:transaction, user: user, amount_spent: 150, created_at: 10.days.ago) }
     let!(:transaction7) { create(:transaction, user: user, amount_spent: 40, created_at: 10.days.ago)  }
     it 'calculates all non expired transactions' do
       expected_point = ((transaction3.amount_spent + transaction4.amount_spent + transaction5.amount_spent) / Transaction::ELIGIBLE_SPEND).to_i * 10
       expected_point += ((transaction6.amount_spent + transaction7.amount_spent) / Transaction::ELIGIBLE_SPEND).to_i * 10 * 2
+      expect(user.total_point).to eq expected_point
+    end
+  end
+
+  context 'with quarterly spend eligible', '#total_point' do
+    let!(:transaction6) { create(:transaction, user: user, country: user.country, amount_spent: 2000, created_at: 10.days.ago )}
+    it 'adds up 100 bonus points' do
+      expected_point = ((transaction3.amount_spent + transaction4.amount_spent + transaction5.amount_spent + transaction6.amount_spent) / Transaction::ELIGIBLE_SPEND).to_i * 10
+      expected_point += 100
+
       expect(user.total_point).to eq expected_point
     end
   end
@@ -52,7 +62,7 @@ RSpec.describe User, 'Instance Method', type: :model do
   context '#rewards' do
     context 'when eligible for free coffee' do
       it 'returns free coffee' do
-        allow(Transaction).to receive_message_chain(:monthly_spend, :eligible_for_free_coffee?).and_return(true)
+        allow(Transaction).to receive_message_chain(:eligible_for_free_coffee?).and_return(true)
         expect(user.rewards).to be_include 'Free Coffee'
       end
     end
