@@ -1,24 +1,19 @@
 # README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+PX Project
 
-Things you may want to cover:
+### Requirements
 
-* Ruby version
+- Ruby >= 2.3.0
+- Rails >= 5.0.7
 
-* System dependencies
+### Setup
+- clone the this repo
+- cd into the cloned repo, run `bundle install`
+- run `rake db:create`, `rake db:migrate`, `rake db:seed`
+- run `rails server` to start the server
+- from the browser, navigate to `localhost:3000`
+- to get all the user, visit `localhost:3000/users`
 
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+### Test
+- to run all test, run `rake`
