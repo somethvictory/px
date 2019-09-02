@@ -48,4 +48,113 @@ RSpec.describe User, 'Instance Method', type: :model do
       expect(user.birthday_month?).to eq false
     end
   end
+
+  context '#rewards' do
+    context 'when eligible for free coffee' do
+      it 'returns free coffee' do
+        allow(Transaction).to receive_message_chain(:monthly_spend, :eligible_for_free_coffee?).and_return(true)
+        expect(user.rewards).to be_include 'Free Coffee'
+      end
+    end
+
+    context 'when user birthday month is the same as current month' do
+      it 'returns free coffee' do
+        user.date_of_birth = Date.current
+
+        expect(user.rewards).to be_include 'Free Coffee'
+      end
+    end
+
+    context 'when total spend is greater than 100' do
+      it 'returns 5% Cash Rebate' do
+        allow(Transaction).to receive(:total_spend).and_return(200)
+
+        expect(user.rewards).to be_include '5% Cash Rebate'
+      end
+    end
+
+    context 'when total spend is less than 100' do
+      it 'returns 5% Cash Rebate' do
+        allow(Transaction).to receive(:total_spend).and_return(90)
+
+        expect(user.rewards).not_to be_include '5% Cash Rebate'
+      end
+    end
+
+    context 'when last sixty day spend is greater than 1000' do
+      it 'returns free movie tickets' do
+        allow(Transaction).to receive_message_chain(:sixty_days_after_first_spend, :total_spend).and_return(1_100)
+
+        expect(user.rewards).to be_include 'Free Movie Tickets'
+      end
+    end
+
+    context 'when last sixty day spend is less than 1000' do
+      it 'returns free movie tickets' do
+        allow(Transaction).to receive_message_chain(:sixty_days_after_first_spend, :total_spend).and_return(900)
+
+        expect(user.rewards).not_to be_include 'Free Movie Tickets'
+      end
+    end
+
+    context 'when user tier is gold' do
+      it 'returns 4x Airport Lounge Access Reward' do
+        allow(user).to receive(:tier).and_return(User::GOLD_TIER)
+
+        expect(user.rewards).to be_include '4x Airport Lounge Access Reward'
+      end
+    end
+
+    context 'when user tier is standard' do
+      it 'returns 4x Airport Lounge Access Reward' do
+        allow(user).to receive(:tier).and_return(User::STANDARD_TIER)
+
+        expect(user.rewards).not_to be_include '4x Airport Lounge Access Reward'
+      end
+    end
+  end
+
+  context '#tier' do
+    context 'standard' do
+      it 'returns standard when total point is 0' do
+        allow(subject).to receive(:total_point).and_return(0)
+
+        expect(subject.tier).to eq User::STANDARD_TIER
+      end
+
+      it 'returns standard when total point is less than 1000' do
+        allow(subject).to receive(:total_point).and_return(900)
+
+        expect(subject.tier).to eq User::STANDARD_TIER
+      end
+    end
+
+    context 'gold' do
+      it 'returns gold when total point is 1000' do
+        allow(subject).to receive(:total_point).and_return(1_000)
+
+        expect(subject.tier).to eq User::GOLD_TIER
+      end
+
+      it 'returns gold when total point is less than 5000' do
+        allow(subject).to receive(:total_point).and_return(3_000)
+
+        expect(subject.tier).to eq User::GOLD_TIER
+      end
+    end
+
+    context 'platinum' do
+      it 'returns platinum when total point is 5000' do
+        allow(subject).to receive(:total_point).and_return(5_000)
+
+        expect(subject.tier).to eq User::PLATINUM_TIER
+      end
+
+      it 'returns platinum when total point is greater than 5000' do
+        allow(subject).to receive(:total_point).and_return(6_000)
+
+        expect(subject.tier).to eq User::PLATINUM_TIER
+      end
+    end
+  end
 end

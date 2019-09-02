@@ -36,21 +36,21 @@ class User < ApplicationRecord
   def rewards
     return @rewards if @rewards
     @rewards = []
-    @rewards << Reward.free_coffee if transactions.grouped_by_month.eligible_for_free_coffee?
-    @rewards << Reward.free_coffee if birthday_month?
-    @rewards << Reward.cash_rebate if transactions.size >= 10 || transactions.total_spend > Transaction::ELIGIBLE_SPEND
-    @rewards << Reward.free_movie_tickets if transactions.sixty_days_after_first_spend.total_spend > Transaction::FREE_TICKET_MOVIE_SPEND
-    @rewards << Reward.airport_lounge_access if tier == GOLD_TIER
+    @rewards << 'Free Coffee'.freeze if transactions.monthly_spend.eligible_for_free_coffee?
+    @rewards << 'Free Coffee'.freeze if birthday_month?
+    @rewards << '5% Cash Rebate'.freeze if transactions.size >= 10 || transactions.total_spend > Transaction::ELIGIBLE_SPEND
+    @rewards << 'Free Movie Tickets'.freeze if transactions.sixty_days_after_first_spend.total_spend > Transaction::FREE_TICKET_MOVIE_SPEND
+    @rewards << '4x Airport Lounge Access Reward'.freeze if tier == GOLD_TIER
 
     @rewards
   end
 
   def tier
-    if total_point == 0 && total_point < 1_000
+    if total_point >= 0 && total_point < 1_000
       STANDARD_TIER
-    elsif  total_point > 1_000 && total_point < 5_000
+    elsif  total_point >= 1_000 && total_point < 5_000
       GOLD_TIER
-    elsif total_point > 5_000
+    elsif total_point >= 5_000
       PLATINUM_TIER
     end
   end
