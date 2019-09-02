@@ -22,7 +22,11 @@ class Transaction < ApplicationRecord
 
   def self.sixty_days_after_first_spend
     first_transaction = order(:created_at).first
-    where('created_at > ? and created_at < ?', first_transaction, first_transaction.created_at + 60.days)
+    if first_transaction.present?
+      where('created_at > ? and created_at < ?', first_transaction, first_transaction.created_at + 60.days)
+    else
+      none
+    end
   end
 
   def self.quarterly_spend

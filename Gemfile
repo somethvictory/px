@@ -10,6 +10,7 @@ end
 gem 'rails', '~> 5.0.7'
 gem 'sqlite3', '~> 1.3.13'
 gem 'puma', '~> 3.0'
+gem 'active_model_serializers', '~> 0.10.0'
 
 group :development, :test do
   gem 'pry'
